@@ -13,17 +13,17 @@ invTGUW(ts.obj)
 \item{ts.obj}{The modified ts.obj is the result of the inverse TGUW transformation and \code{ts.coeffs} now presents the estimated piecewise-linear signal of the data.}
 }
 \description{
-This function performs the inverse TGUW transformation by undoing the orthonormal transformation of \code{TGUW} in reverse order.
-Details of the inverse TGUW transformation can be found in H. Maeng and P. Fryzlewicz (2019), Detecting linear trend changes and point anomalies in data sequences, preprint.
+This function is used inside \code{\link{trendsegment}} and performs the inverse TGUW transformation by undoing the orthonormal transformation of \code{TGUW} in reverse order.
+Details of the inverse TGUW transformation can be found in H. Maeng and P. Fryzlewicz (2021), Detecting linear trend changes in data sequences, preprint.
 }
 \examples{
-x <- c(1:10, 0, rep(5,9))
+x <- c(1:10, rep(5,9))
 n <- length(x)
 x <- x + rnorm(n)
 tguwfit <- TGUW(x)
 th.const <- 1.3
 lambda <- (stats::mad(diff(diff(x)))/sqrt(6)) * sqrt(2 * log(n)) * th.const
-thrfit <- thresholding(ts.obj = tguwfit, lambda = lambda)
+thrfit <- thresholding(ts.obj = tguwfit, lambda = lambda, minsegL = 5, bal = 0, connected = TRUE)
 invfit <- invTGUW(ts.obj = thrfit)
 invfit
 }
@@ -31,5 +31,5 @@ invfit
 \code{\link{trendsegment}}, \code{\link{TGUW}}, \code{\link{thresholding}}
 }
 \author{
-Hyeyoung Maeng, \email{h.maeng@lse.ac.uk}
+Hyeyoung Maeng \email{h.maeng4@lancaster.ac.uk}, Piotr Fryzlewicz \email{p.fryzlewicz@lse.ac.uk}
 }

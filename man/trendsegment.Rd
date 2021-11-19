@@ -2,9 +2,17 @@
 % Please edit documentation in R/trendsegment.R
 \name{trendsegment}
 \alias{trendsegment}
-\title{Detecting linear trend changes and point anomalies for univariate time series}
+\title{Detecting linear trend changes for univariate time series}
 \usage{
-trendsegment(x, th.const = 1.3, p = 0.01, bal = 0)
+trendsegment(
+  x,
+  th.const = 1.3,
+  p = 0.01,
+  bal = 0,
+  minsegL = 5,
+  continuous = FALSE,
+  connected = FALSE
+)
 }
 \arguments{
 \item{x}{A data vector to be examined for change-point detection.}
@@ -13,7 +21,13 @@ trendsegment(x, th.const = 1.3, p = 0.01, bal = 0)
 
 \item{p}{Proportion of all possible remaining merges which specifies the number of merges allowed in a single pass over the data. This is used in \code{\link{TGUW}} and the default is 0.01.}
 
-\item{bal}{The minimum ratio of the length of the shorter region to the length of the entire merging region especially when the merges of Type 2 (merging one initial and a paired smooth coefficient) or of Type 3 (merging two sets of (paired) smooth coefficients) are performed. If \code{bal < 1/n}, point anomalies can be detected, otherwise, the detection of point anomalies is not guaranteed. The default is set to 0 for detecting both point anomalies and linear trend changes.}
+\item{bal}{The minimum ratio of the length of the shorter region to the length of the entire merging region especially when the merges of Type 2 (merging one initial and a paired smooth coefficient) or of Type 3 (merging two sets of (paired) smooth coefficients) are performed. If \code{bal < 1/n} and \code{minsegL = 1}, point anomalies (segments including only one data point) can possibly be detected, otherwise, the detection of point anomalies is not guaranteed. The default is set to 0.}
+
+\item{minsegL}{The minimum segment length of estimated signal returned by \code{trendsegment}. The default is set to 5 for avoiding too frequent change-points.}
+
+\item{continuous}{If continuous=TRUE, the estimated signal returned by \code{trendsegment} is continuous at change-points, otherwise discontinuous at change-points. The default is set to FALSE.}
+
+\item{connected}{If connected=TRUE, the \code{trendsegment} algorithm puts the connected rule above the \code{minsegL}, otherwise it makes keeping the \code{minsegL} a priority. The default is set to FALSE.}
 }
 \value{
 A list with the following.
@@ -23,13 +37,13 @@ A list with the following.
 \item{cpt}{The estimated locations of change-points.}
 }
 \description{
-The main function of the package \code{\link{trendsegmentR}}. This function estimates the number and locations of change-points in linear trend of noisy data. The estimated change-points may contain point anomalies if any. It also returns the estimated signal, the best linear fit for each segment between a pair of adjacent change-points. The algorithm includes three steps, Tail-Greedy Unbalanced Wavelet (TGUW) transform (\code{\link{TGUW}}), thresholding (\code{\link{thresholding}}) and inverse TGUW transform (\code{\link{invTGUW}}).
+The main function of the package \code{\link{trendsegmentR}}. This function estimates the number and locations of change-points in linear trend of noisy data. The estimated change-points may contain point anomalies (segments including only one data point) if any. It also returns the estimated signal, the best linear fit for each segment between a pair of adjacent change-points. The algorithm includes three steps, Tail-Greedy Unbalanced Wavelet (TGUW) transform (\code{\link{TGUW}}), thresholding (\code{\link{thresholding}}) and inverse TGUW transform (\code{\link{invTGUW}}).
 }
 \details{
-The algorithm is described in H. Maeng and P. Fryzlewicz (2019), Detecting linear trend changes and point anomalies in data sequences, preprint.
+The algorithm is described in H. Maeng and P. Fryzlewicz (2021), Detecting linear trend changes in data sequences, preprint.
 }
 \examples{
-x <- c(rep(0,100), -4, seq(0, 4, length.out = 100), rep(3, 100), seq(3, -1, length.out=99))
+x <- c(rep(0,100), seq(0, 4, length.out = 100), rep(3, 100), seq(3, -1, length.out=99))
 n <- length(x)
 x <- x + rnorm(n)
 tsfit <- trendsegment(x = x, bal = 0)
@@ -42,5 +56,5 @@ lines(tsfit$est, col=2, lwd=2)
 \code{\link{TGUW}}, \code{\link{thresholding}}, \code{\link{invTGUW}}
 }
 \author{
-Hyeyoung Maeng, \email{h.maeng@lse.ac.uk}
+Hyeyoung Maeng \email{h.maeng4@lancaster.ac.uk}, Piotr Fryzlewicz \email{p.fryzlewicz@lse.ac.uk}
 }

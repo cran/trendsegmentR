@@ -1,7 +1,7 @@
 #' Tail-Greedy Unbalanced Wavelet (TGUW) transformation of a vector
 #'
-#' Performs the bottom-up unbalanced wavelet decomposition.
-#' Details of the TGUW transformation can be found in H. Maeng and P. Fryzlewicz (2019), Detecting linear trend changes and point anomalies in data sequences, preprint.
+#' Performs the bottom-up unbalanced wavelet decomposition. This function is used inside \code{\link{trendsegment}}.
+#' Details of the TGUW transformation can be found in H. Maeng and P. Fryzlewicz (2021), Detecting linear trend changes in data sequences, preprint.
 #'
 #' @param x An input vector to be decomposed.
 #' @param p Proportion of all possible remaining merges which specifies the number of merges allowed in a single pass over the data. The default is 0.01.
@@ -11,18 +11,15 @@
 #' \item{twotogether}{A vector indicating locations of the detail coefficients returned by Type 3 merges (merging two sets of paired smooth coefficients). This is used in \code{\link{thresholding}} to apply the "two together" rule which makes both detail coefficients (paired by a Type 3 merge) survived if at least one of their size is over threshold.}
 #' \item{merging.hist}{An array of dimension 4 by 3 by \code{n}-2 which has the full record of the \code{n}-2 merges in the TGUW transformation. Each matrix contains the information of each merge. The first row shows the indices of merged smooth coefficients in increasing order and the second row gives the value of detail filter coefficients which is the weight vector for computing the corresponding detail coefficient. The third row shows the (detail coefficient, first smooth coefficient, second smooth coefficient) obtained by an orthonormal transform. The fourth row gives the balancedness of merging. If it is Type 1 merging (three initial smooth coefficients) then the fourth row is always (1/3, 1/3, 1/3). In Type 2 and Type 3 mergings, the values depend on the ratio of the length of the left and right wings to the entire merged region and only first two components of the fourth row are filled with the corresponding ratios (sum to 1) but the third one is left as NA.}
 #' \item{ts.coeffs}{The transformed \code{x} by the TGUW transformation.}
-#' @author Hyeyoung Maeng, \email{h.maeng@@lse.ac.uk}
+#' @author Hyeyoung Maeng \email{h.maeng4@@lancaster.ac.uk}, Piotr Fryzlewicz \email{p.fryzlewicz@@lse.ac.uk}
 #' @seealso \code{\link{trendsegment}}, \code{\link{thresholding}}, \code{\link{invTGUW}}
 #' @examples
-#' x <- c(1:10, 0, rep(5,9))
+#' x <- c(1:10, rep(5,9))
 #' n <- length(x)
 #' x <- x + rnorm(n)
 #' tguwfit <- TGUW(x)
 #' tguwfit
 #' @export
-
-
-
 
 
 TGUW <- function(x, p = .01) {
@@ -124,9 +121,8 @@ TGUW <- function(x, p = .01) {
         if(sum(removable.nodes[edges[ord.det[tei:(tei+1)],1]])==2 & sum(removable.nodes[edges[ord.det[tei:(tei+1)],2]])==2 & sum(removable.nodes[edges[ord.det[tei:(tei+1)],3]])==2){
           removable.nodes[edges[ord.det[tei:(tei+1)],1]] <- removable.nodes[edges[ord.det[tei:(tei+1)],2]] <- removable.nodes[edges[ord.det[tei:(tei+1)],3]] <- 0
           eitr <- c(eitr, tei, tei+1)
-          tei <- tei + 1
-
         }
+        tei <- tei + 1
       } else{
         if(removable.nodes[edges[ord.det[tei],1]] & removable.nodes[edges[ord.det[tei],2]] & removable.nodes[edges[ord.det[tei],3]]){
           eitr <- c(eitr, tei)
@@ -151,10 +147,12 @@ TGUW <- function(x, p = .01) {
     ### t(M)%*%M is an identity matrix (which means M is a orthonormal matrix)
 
     ee <- matrix(edges[details.min.ind,], no.of.current.steps, 4)
-    twotogether <- c(twotogether, c(ee[,4]))
+    #twotogether <- c(twotogether, c(ee[,4]))
     idx0 <- idx # keep original idx
 
     if(sum(ee[,4]>0)==0){
+
+      twotogether <- c(twotogether, c(ee[,4]))
 
       ee <- ee[, -4, drop=F]
 
@@ -171,25 +169,36 @@ TGUW <- function(x, p = .01) {
 
     } else{
 
+      twotogether <- c(twotogether, c(ee[which(ee[,4]!=0), 4]))
+
       ### 1) 2 sets of pairs
       pr <- matrix(which(ee[,4]!=0), nrow=2)
       ee[pr[2,], 1:2] <- ee[pr[1,], 1:2]
-      ee <- ee[, -4, drop=F]
+
+      #ee <- ee[, -4, drop=F]
+
+
+      ee.p1 <- ee[pr[1,], -4, drop=F]
+      ee.p2 <- ee[pr[2,], -4, drop=F]
 
       ######################################## i) first paired edges
-      ee.p1 <- ee[pr[1,],,drop=F]
-      ee.p2 <- ee[pr[2,],,drop=F]
-
       udt <- updating(ee=ee.p1, weights.const=weights.const, weights.lin=weights.lin, ts.coeffs=ts.coeffs, idx=idx)
       weights.const <- udt$weights.const
       weights.lin <- udt$weights.lin
       ts.coeffs <- udt$ts.coeffs
       idx <- udt$idx
 
-      merging.hist[1,,(current.step+1):(current.step+dim(ee.p1)[1])] <- t(ee.p1)
-      merging.hist[2,,(current.step+1):(current.step+dim(ee.p1)[1])] <- udt$h
-      merging.hist[3,,(current.step+1):(current.step+dim(ee.p1)[1])] <- t(udt$tc1)
-      merging.hist[4,,(current.step+1):(current.step+dim(ee.p1)[1])] <- balance.p(pr=pr, ee.p1=ee.p1, idx=idx0, ee.p2=ee.p2, n=n)
+      merge1 <- seq((current.step+1), (current.step+length(pr)), by=2)
+      merge2 <- merge1 + 1
+
+      #merging.hist[1,,(current.step+1):(current.step+dim(ee.p1)[1])] <- t(ee.p1)
+      #merging.hist[2,,(current.step+1):(current.step+dim(ee.p1)[1])] <- udt$h
+      #merging.hist[3,,(current.step+1):(current.step+dim(ee.p1)[1])] <- t(udt$tc1)
+      #merging.hist[4,,(current.step+1):(current.step+dim(ee.p1)[1])] <- balance.p(pr=pr, ee.p1=ee.p1, idx=idx0, ee.p2=ee.p2, n=n)
+      merging.hist[1,,merge1] <- t(ee.p1)
+      merging.hist[2,,merge1] <- udt$h
+      merging.hist[3,,merge1] <- t(udt$tc1)
+      merging.hist[4,,merge1] <- balance.p(pr=pr, ee.p1=ee.p1, idx=idx0, ee.p2=ee.p2, n=n)
 
       ######################################## ii) second paired edges
 
@@ -199,14 +208,19 @@ TGUW <- function(x, p = .01) {
       ts.coeffs <- udt$ts.coeffs
       idx <- udt$idx
 
-      merging.hist[1,,(current.step+dim(ee.p1)[1]+1):(current.step+length(pr))] <- t(ee.p2)
-      merging.hist[2,,(current.step+dim(ee.p1)[1]+1):(current.step+length(pr))] <- udt$h
-      merging.hist[3,,(current.step+dim(ee.p1)[1]+1):(current.step+length(pr))] <- t(udt$tc1)
-      merging.hist[4,,(current.step+dim(ee.p1)[1]+1):(current.step+length(pr))] <- balance.p(pr=pr, ee.p1=ee.p1, idx=idx0, ee.p2=ee.p2, n=n)
+      #merging.hist[1,,(current.step+dim(ee.p1)[1]+1):(current.step+length(pr))] <- t(ee.p2)
+      #merging.hist[2,,(current.step+dim(ee.p1)[1]+1):(current.step+length(pr))] <- udt$h
+      #merging.hist[3,,(current.step+dim(ee.p1)[1]+1):(current.step+length(pr))] <- t(udt$tc1)
+      #merging.hist[4,,(current.step+dim(ee.p1)[1]+1):(current.step+length(pr))] <- balance.p(pr=pr, ee.p1=ee.p1, idx=idx0, ee.p2=ee.p2, n=n)
+      merging.hist[1,,merge2] <- t(ee.p2)
+      merging.hist[2,,merge2] <- udt$h
+      merging.hist[3,,merge2] <- t(udt$tc1)
+      merging.hist[4,,merge2] <- balance.p(pr=pr, ee.p1=ee.p1, idx=idx0, ee.p2=ee.p2, n=n)
 
       if(length(pr)!=dim(ee)[1]){
         ######################################## iii) non paired
-        ee.np <- ee[-c(pr),,drop=F]
+        twotogether <- c(twotogether, c(ee[which(ee[,4]==0), 4]))
+        ee.np <- ee[-c(pr), -4, drop=F]
 
         udt <- updating(ee=ee.np, weights.const=weights.const, weights.lin=weights.lin, ts.coeffs=ts.coeffs, idx=idx)
         weights.const <- udt$weights.const
@@ -220,6 +234,9 @@ TGUW <- function(x, p = .01) {
         merging.hist[4,,(current.step+length(pr)+1):(current.step+no.of.current.steps)] <- balance.np(paired=paired, ee=ee.np, idx=idx0, no.of.current.steps=no.of.current.steps-length(pr), n=n)
 
       }
+
+      ee <- ee[, -4, drop=F]
+
     }
 
     ############################################
@@ -268,5 +285,3 @@ TGUW <- function(x, p = .01) {
   return(list(x=x, n = n, twotogether=twotogether, merging.hist=merging.hist, ts.coeffs=ts.coeffs))
 
 }
-
-

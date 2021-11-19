@@ -1,3 +1,88 @@
+# Finding a detail filter vector for computing a detail coefficient
+#
+# This function is used inside \code{\link{TGUW}} function but is typically not called directly by the user. This returns a vector of detail filter, a weight vector of the triplet of smooth coefficients where the corresponding detail coefficient is obtained as a weighted sum of three smooth coefficients.
+#
+# The detail filter is obtained in such a way to produce zero detail coefficient only when the corresponding (raw) observations in merging regions have a perfect linear trend, as the detail coefficient itself represents the extent of non-linearity in the corresponding region of data. This implies that the smaller the size of the detail coefficient, the closer the alignment of the corresponding data section with linearity.
+#
+# @param a A vector with length 6. First three elements contain a triplet selected from the weight vector of constancy and the last three elements correspond to a selected triplet of the weight vector of linearity.
+# @return
+# \item{df}{The detail filter vector of length 3 which is used as a weight vector for the corresponding triplet of smooth coefficients.}
+# @author Hyeyoung Maeng \email{h.maeng4@@lancaster.ac.uk}, Piotr Fryzlewicz \email{p.fryzlewicz@@lse.ac.uk}
+# @seealso \code{\link{TGUW}}
+# @examples
+# x <- c(rep(1, 3), 1:3)
+# filter(x)
+#
+# y <- c(rep(1, 3), 4:6)
+# filter(y) # same as filter(x)
+# @export
+
+filter <- function(a) {
+
+  #	work out a 3-tap high-pass filter which annihilates vectors a and b
+
+  w <- -sqrt( (a[5]*a[1] - a[4]*a[2])^2 / ((a[2]*a[6] - a[3]*a[5])^2 + (a[4]*a[3] - a[1]*a[6])^2 + (a[5]*a[1] - a[4]*a[2])^2))
+
+  u <- w * (a[2]*a[6] - a[3]*a[5])/(a[5]*a[1] - a[4]*a[2])
+
+  v <- w * (a[3]*a[4] - a[1]*a[6])/(a[5]*a[1] - a[4]*a[2])
+
+  df <- c(u, v, w)
+
+  if (any(is.na(df))) {
+    z <- filter(a[6:1])
+    df <- z[3:1]
+  }
+  return(df)
+
+}
+
+
+
+
+
+# Finding an orthonormal matrix based on a detail filter vector
+#
+# This function is used inside \code{\link{TGUW}} function but is typically not called directly by the user. This gives an orthonormal matrix with dimension 3 by 3 by computing two low filter vectors based on a given detail filter vector. The returned orthonormal matrix is firstly used in the orthonormal transformation of \code{\link{TGUW}} when updating three neighbouring smooth coefficients into one detail and two smooth coefficients, and its inverse matrix is used in the inverse TGUW transformation (\code{\link{invTGUW}}).
+#
+# @param d A detail filter returned by \code{\link{filter}} which has a form of a vector with length 3.
+# @return
+# \item{M}{The orthonormal matrix with dimension 3 by 3 which is used in \code{\link{TGUW}} and \code{\link{invTGUW}}.}
+# @author Hyeyoung Maeng \email{h.maeng4@@lancaster.ac.uk}, Piotr Fryzlewicz \email{p.fryzlewicz@@lse.ac.uk}
+# @seealso \code{\link{TGUW}}, \code{\link{invTGUW}}, \code{\link{filter}}
+# @examples
+# x <- c(rep(1, 3), 1:3)
+# df <- filter(x) # detail filter
+# orthmatrix(df)
+# @export
+
+orthmatrix <- function(d) {
+
+  M <- matrix(0, 3, 3)
+
+  ##### STEP 1 : Normalisaion of high-pass filter row #####
+  M[1,] <- d
+  M[1,] <- M[1,] / sqrt(sum(M[1,]^2))
+  u <- M[1, 1]
+  v <- M[1, 2]
+  w <- M[1, 3]
+
+  ##### STEP 2 : Choose the vector which gives zero for the inner product of the first one #####
+  M[2,] <- c(1-u^2, -u*v, -u*w)
+  M[3,] <- c(0, -w, v)
+
+  ##### STEP 3 : Normalisation #####
+  M[2,] <- M[2,] / sqrt(sum(M[2,]^2))
+  M[3,] <- M[3,] / sqrt(sum(M[3,]^2))
+
+  return(M)
+
+}
+
+
+
+
+
 # Finding the detected change-points from the object returned by the inverse TGUW transformation
 # INTERNAL function in \code{\link{trendsegment}} to obtain the estimated change-points by trendsegment algorithm. This function is typically not called directly by the user.
 #  @param ts.obj An object returned by \code{invTGUW}.
@@ -66,10 +151,6 @@ finding.cp <- function(ts.obj){
   }
   return(cp)
 }
-
-
-
-
 
 
 
@@ -187,14 +268,16 @@ balance.np <- function(paired=paired, ee=ee, idx, no.of.current.steps=no.of.curr
 
   if(length(firsttwo)>0){
     prtn <- ee[firsttwo,3] - ee[firsttwo,1]
-    blnc[1:2, firsttwo] <- rbind(prtn/(prtn+1), 1/(prtn+1))
+    #blnc[1:2, firsttwo] <- rbind(prtn/(prtn+1), 1/(prtn+1))
+    blnc[1:3, firsttwo] <- rbind(prtn/(prtn+1), 1/(prtn+1), (prtn+1))
   }
   if(length(lasttwo)>0){
     prtn <- idx[match(ee[lasttwo, 3], idx)+1] - ee[lasttwo, 2]
     if(sum(is.na(prtn))>0){
       prtn[which(is.na(prtn))] <- n - ee[which(is.na(prtn)), 2] + 1
     }
-    blnc[1:2, lasttwo] <- rbind(1/(prtn+1), prtn/(prtn+1))
+    #blnc[1:2, lasttwo] <- rbind(1/(prtn+1), prtn/(prtn+1))
+    blnc[1:3, lasttwo] <- rbind(1/(prtn+1), prtn/(prtn+1), (prtn+1))
   }
   if(length(nopair)>0){
     blnc[1:3, nopair] <- 1/3
@@ -228,8 +311,9 @@ balance.p <- function(pr=pr, ee.p1=ee.p1, idx, ee.p2=ee.p2, n=n){
     c2[which(is.na(c2))] <- n - ee.p1[which(is.na(c2)), 3] + 1
   }
 
-  blnc[1:2,] <-  t(matrix(c(c1/(c1+c2), c2/(c1+c2)), nrow=2))
-
+  #blnc[1:2,] <-  t(matrix(c(c1/(c1+c2), c2/(c1+c2)), nrow=2))
+  #blnc[1:2,] <-  t(cbind(c1/(c1+c2), c2/(c1+c2)))
+  blnc[1:3,] <-  rbind(c1/(c1+c2), c2/(c1+c2), (c1+c2))
   return(blnc)
 }
 

@@ -20,11 +20,11 @@ A list with the followings:
 \item{ts.coeffs}{The transformed \code{x} by the TGUW transformation.}
 }
 \description{
-Performs the bottom-up unbalanced wavelet decomposition.
-Details of the TGUW transformation can be found in H. Maeng and P. Fryzlewicz (2019), Detecting linear trend changes and point anomalies in data sequences, preprint.
+Performs the bottom-up unbalanced wavelet decomposition. This function is used inside \code{\link{trendsegment}}.
+Details of the TGUW transformation can be found in H. Maeng and P. Fryzlewicz (2021), Detecting linear trend changes in data sequences, preprint.
 }
 \examples{
-x <- c(1:10, 0, rep(5,9))
+x <- c(1:10, rep(5,9))
 n <- length(x)
 x <- x + rnorm(n)
 tguwfit <- TGUW(x)
@@ -34,5 +34,5 @@ tguwfit
 \code{\link{trendsegment}}, \code{\link{thresholding}}, \code{\link{invTGUW}}
 }
 \author{
-Hyeyoung Maeng, \email{h.maeng@lse.ac.uk}
+Hyeyoung Maeng \email{h.maeng4@lancaster.ac.uk}, Piotr Fryzlewicz \email{p.fryzlewicz@lse.ac.uk}
 }

@@ -4,38 +4,42 @@
 \alias{thresholding}
 \title{Noise reduction from the sequence of detail coefficients returned by the Tail-Greedy Unbalanced Wavelet (TGUW) transformation}
 \usage{
-thresholding(ts.obj, lambda, bal = 0)
+thresholding(ts.obj, lambda, minsegL, bal = 0, connected = FALSE)
 }
 \arguments{
 \item{ts.obj}{A list returned by \code{TGUW}.}
 
 \item{lambda}{The magnitude of the threshold. It has a form of \code{sigma * th.const * sqrt(2 * log(n))} where \code{n} is the length of input data \code{x}, the default of \code{th.const} is 1.3 and the \code{sigma} can be estimated by Median Absolute Deviation (MAD) method under the Gaussian assumption for noise.}
 
-\item{bal}{The minimum ratio of the length of the shorter region to the length of the entire merging region especially when the merges of Type 2 (merging one initial and a paired smooth coefficient) or of Type 3 (merging two sets of (paired) smooth coefficients) are performed. Only triplets which satisfy this balancedness condition survives in denoising. Point anomalies can be detected only if \code{bal < 1/n}. The default is set to 0 for detecting both point anomalies and linear trend changes.}
+\item{minsegL}{The minimum segment length of estimated signal returned by \code{trendsegment}.}
+
+\item{bal}{The minimum ratio of the length of the shorter region to the length of the entire merging region especially when the merges of Type 2 (merging one initial and a paired smooth coefficient) or of Type 3 (merging two sets of (paired) smooth coefficients) are performed. Only triplets which satisfy this balancedness condition survives in denoising. Point anomalies can be detected only if \code{bal < 1/n} and \code{minsegL = 1}. The default is set to 0.}
+
+\item{connected}{If connected=TRUE, the thresholding puts the connected rule above the \code{minsegL}, otherwise it makes keeping the \code{minsegL} a priority.}
 }
 \value{
 \item{ts.obj}{The modified ts.obj containing zero detail coefficients in the \code{merging.hist} if not survived from thresholding.}
 }
 \description{
-This function performs the thresholding of the detail coefficients returned by the Tail-Greedy Unbalanced Wavelet (TGUW) transformation.
+This function is used inside \code{\link{trendsegment}} and performs the thresholding of the detail coefficients returned by the Tail-Greedy Unbalanced Wavelet (TGUW) transformation.
 The denoising is achieved by a prespecified threshold in a "connected" way in that it prunes the branches if and only if
 the detail coefficient itself and all of its children coefficients are below some thresholds in its size. Also, the
 "two together" rule is applied to any paired detail coefficients returned by Type 3
-merging (merging two sets of paired smooth coefficients) in the sense that both detail coefficients should be survived if at least one of their size is over threshold. For details, see H. Maeng and P. Fryzlewicz (2019), Detecting linear trend changes and point anomalies in data sequences, preprint.
+merging (merging two sets of paired smooth coefficients) in the sense that both detail coefficients should be survived if at least one of their size is over threshold. For details, see H. Maeng and P. Fryzlewicz (2021), Detecting linear trend changes in data sequences, preprint.
 }
 \examples{
-x <- c(1:10, 0, rep(5,9))
+x <- c(1:10, rep(5,9))
 n <- length(x)
 x <- x + rnorm(n)
 tguwfit <- TGUW(x)
 th.const <- 1.3
 lambda <- (stats::mad(diff(diff(x)))/sqrt(6)) * sqrt(2 * log(n)) * th.const
-thrfit <- thresholding(ts.obj = tguwfit, lambda = lambda)
+thrfit <- thresholding(ts.obj = tguwfit, lambda = lambda, minsegL = 5, bal = 0, connected = FALSE)
 thrfit
 }
 \seealso{
 \code{\link{trendsegment}}, \code{\link{TGUW}}, \code{\link{invTGUW}}
 }
 \author{
-Hyeyoung Maeng, \email{h.maeng@lse.ac.uk}
+Hyeyoung Maeng \email{h.maeng4@lancaster.ac.uk}, Piotr Fryzlewicz \email{p.fryzlewicz@lse.ac.uk}
 }

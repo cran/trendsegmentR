@@ -1,21 +1,18 @@
 Package: trendsegmentR
-Title: Linear Trend Segmentation and Point Anomaly Detection
-Version: 1.0.0
-Authors@R: c(person("Hyeyoung", "Maeng", email = "h.maeng@lse.ac.uk", role = c("aut", "cre")), person("Piotr", "Fryzlewicz", email = "p.fryzlewicz@lse.ac.uk", role="aut"))
-Description: Performs the detection of point anomalies and linear trend changes 
-    for univariate time series by implementing the bottom-up unbalanced wavelet transformation 
-    proposed by H. Maeng and P. Fryzlewicz (2019) <http://personal.lse.ac.uk/maengh/>. 
-    The estimated number and locations of the change-points are returned with the 
-    piecewise-linear estimator for signal.
-Depends: R (>= 3.6.0)
+Title: Linear Trend Segmentation
+Version: 1.1.0
+Authors@R: c(person("Hyeyoung", "Maeng", email = "h.maeng4@lancaster.ac.uk", role = c("aut", "cre")), person("Piotr", "Fryzlewicz", email = "p.fryzlewicz@lse.ac.uk", role="aut"))
+Maintainer: Hyeyoung Maeng <h.maeng4@lancaster.ac.uk>
+Description: Performs the detection of linear trend changes for univariate time series 
+    by implementing the bottom-up unbalanced wavelet transformation proposed by 
+    H. Maeng and P. Fryzlewicz (2021). The estimated number and locations of the 
+    change-points are returned with the piecewise-linear estimator for signal.
 License: GPL
 Encoding: UTF-8
-RoxygenNote: 6.1.1
-LazyData: true
+RoxygenNote: 7.1.2
 NeedsCompilation: no
-Maintainer: Hyeyoung Maeng <h.maeng@lse.ac.uk>
 Repository: CRAN
-Packaged: 2019-05-03 13:16:21 UTC; maengh
+Packaged: 2021-11-14 19:56:04 UTC; hyeyoung
 Author: Hyeyoung Maeng [aut, cre],
   Piotr Fryzlewicz [aut]
-Date/Publication: 2019-05-03 15:20:03 UTC
+Date/Publication: 2021-11-19 07:30:02 UTC
