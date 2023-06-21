@@ -6,10 +6,11 @@
 \usage{
 trendsegment(
   x,
-  th.const = 1.3,
-  p = 0.01,
+  indep = FALSE,
+  th.const = krt.hvt(x)$thr,
+  p = 0.04,
   bal = 0,
-  minsegL = 5,
+  minsegL = floor(0.9 * log(length(x))),
   continuous = FALSE,
   connected = FALSE
 )
@@ -17,13 +18,15 @@ trendsegment(
 \arguments{
 \item{x}{A data vector to be examined for change-point detection.}
 
-\item{th.const}{Thresholding parameter used in \code{\link{thresholding}}. The default is 1.3 and the exact magnitude of the threshold is \code{sigma * th.const * sqrt(2 * log(n))} where \code{n} is the length of data sequence \code{x} and \code{sigma} is estimated by Median Absolute Deviation (MAD) method under the Gaussian assumption for noise.}
+\item{indep}{If x is known to be independent over time, let indep=TRUE, otherwise the default is indep=FALSE.}
 
-\item{p}{Proportion of all possible remaining merges which specifies the number of merges allowed in a single pass over the data. This is used in \code{\link{TGUW}} and the default is 0.01.}
+\item{th.const}{Robust thresholding parameter used in \code{\link{thresholding}}. The default is obtained by considering sample kurtosis and long run standard deviation. The exact magnitude of the threshold also depends on \code{sigma} which is estimated by Median Absolute Deviation (MAD) method under the i.i.d. Gaussian noise assumption.}
 
-\item{bal}{The minimum ratio of the length of the shorter region to the length of the entire merging region especially when the merges of Type 2 (merging one initial and a paired smooth coefficient) or of Type 3 (merging two sets of (paired) smooth coefficients) are performed. If \code{bal < 1/n} and \code{minsegL = 1}, point anomalies (segments including only one data point) can possibly be detected, otherwise, the detection of point anomalies is not guaranteed. The default is set to 0.}
+\item{p}{Proportion of all possible remaining merges which specifies the number of merges allowed in a single pass over the data. This is used in \code{\link{TGUW}} and the default is 0.04.}
 
-\item{minsegL}{The minimum segment length of estimated signal returned by \code{trendsegment}. The default is set to 5 for avoiding too frequent change-points.}
+\item{bal}{The minimum ratio of the length of the shorter region to the length of the entire merging region especially when the merges of Type 2 (merging one initial and a paired smooth coefficient) or of Type 3 (merging two sets of (paired) smooth coefficients) are performed. The default is set to 0.}
+
+\item{minsegL}{The minimum segment length of estimated signal returned by \code{trendsegment}. The default is set to \code{sigma * log(n)} for the noise which is possibly dependent and/or non-Gaussian.}
 
 \item{continuous}{If continuous=TRUE, the estimated signal returned by \code{trendsegment} is continuous at change-points, otherwise discontinuous at change-points. The default is set to FALSE.}
 
@@ -40,21 +43,22 @@ A list with the following.
 The main function of the package \code{\link{trendsegmentR}}. This function estimates the number and locations of change-points in linear trend of noisy data. The estimated change-points may contain point anomalies (segments including only one data point) if any. It also returns the estimated signal, the best linear fit for each segment between a pair of adjacent change-points. The algorithm includes three steps, Tail-Greedy Unbalanced Wavelet (TGUW) transform (\code{\link{TGUW}}), thresholding (\code{\link{thresholding}}) and inverse TGUW transform (\code{\link{invTGUW}}).
 }
 \details{
-The algorithm is described in H. Maeng and P. Fryzlewicz (2021), Detecting linear trend changes in data sequences, preprint.
+The algorithm is described in H. Maeng and P. Fryzlewicz (2023), Detecting linear trend changes in data sequences.
 }
 \examples{
 x <- c(rep(0,100), seq(0, 4, length.out = 100), rep(3, 100), seq(3, -1, length.out=99))
 n <- length(x)
 x <- x + rnorm(n)
-tsfit <- trendsegment(x = x, bal = 0)
+tsfit <- trendsegment(x = x)
 tsfit
 
 plot(x, type = "b", ylim = range(x, tsfit$est))
 lines(tsfit$est, col=2, lwd=2)
+abline(v=tsfit$cpt, col=3, lty=2, lwd=2)
 }
 \seealso{
 \code{\link{TGUW}}, \code{\link{thresholding}}, \code{\link{invTGUW}}
 }
 \author{
-Hyeyoung Maeng \email{h.maeng4@lancaster.ac.uk}, Piotr Fryzlewicz \email{p.fryzlewicz@lse.ac.uk}
+Hyeyoung Maeng \email{hyeyoung.maeng@durham.ac.uk}, Piotr Fryzlewicz \email{p.fryzlewicz@lse.ac.uk}
 }

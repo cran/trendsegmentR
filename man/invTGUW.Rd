@@ -14,7 +14,7 @@ invTGUW(ts.obj)
 }
 \description{
 This function is used inside \code{\link{trendsegment}} and performs the inverse TGUW transformation by undoing the orthonormal transformation of \code{TGUW} in reverse order.
-Details of the inverse TGUW transformation can be found in H. Maeng and P. Fryzlewicz (2021), Detecting linear trend changes in data sequences, preprint.
+Details of the inverse TGUW transformation can be found in H. Maeng and P. Fryzlewicz (2023), Detecting linear trend changes in data sequences.
 }
 \examples{
 x <- c(1:10, rep(5,9))
@@ -31,5 +31,5 @@ invfit
 \code{\link{trendsegment}}, \code{\link{TGUW}}, \code{\link{thresholding}}
 }
 \author{
-Hyeyoung Maeng \email{h.maeng4@lancaster.ac.uk}, Piotr Fryzlewicz \email{p.fryzlewicz@lse.ac.uk}
+Hyeyoung Maeng \email{hyeyoung.maeng@durham.ac.uk}, Piotr Fryzlewicz \email{p.fryzlewicz@lse.ac.uk}
 }

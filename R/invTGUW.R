@@ -1,12 +1,12 @@
 #' Inverse Tail-Greedy Unbalanced Wavelet (TGUW) transformation
 #'
 #' This function is used inside \code{\link{trendsegment}} and performs the inverse TGUW transformation by undoing the orthonormal transformation of \code{TGUW} in reverse order.
-#' Details of the inverse TGUW transformation can be found in H. Maeng and P. Fryzlewicz (2021), Detecting linear trend changes in data sequences, preprint.
+#' Details of the inverse TGUW transformation can be found in H. Maeng and P. Fryzlewicz (2023), Detecting linear trend changes in data sequences.
 #'
 #' @param ts.obj A list returned by \code{thresholding}.
 #' @return
 #' \item{ts.obj}{The modified ts.obj is the result of the inverse TGUW transformation and \code{ts.coeffs} now presents the estimated piecewise-linear signal of the data.}
-#' @author Hyeyoung Maeng \email{h.maeng4@@lancaster.ac.uk}, Piotr Fryzlewicz \email{p.fryzlewicz@@lse.ac.uk}
+#' @author Hyeyoung Maeng \email{hyeyoung.maeng@@durham.ac.uk}, Piotr Fryzlewicz \email{p.fryzlewicz@@lse.ac.uk}
 #' @seealso \code{\link{trendsegment}}, \code{\link{TGUW}}, \code{\link{thresholding}}
 #' @examples
 #' x <- c(1:10, rep(5,9))
@@ -43,7 +43,6 @@ invTGUW <- function(ts.obj) {
     ### Choose the corresponding combination of detail and x value
     ts.obj$merging.hist[3,2,i] <- ts.obj$ts.coeffs[ind[1]]
     ts.obj$merging.hist[3,3,i] <- ts.obj$ts.coeffs[ind[2]]
-
     tmp <- c(ts.obj$merging.hist[3,1,i], ts.obj$merging.hist[3,2,i], ts.obj$merging.hist[3,3,i])
 
     ### Obtain "3" values of x from the combination of detail coefficient and "2" values of x, tmp=c( min(details), x ),

@@ -7,7 +7,7 @@
 # @param a A vector with length 6. First three elements contain a triplet selected from the weight vector of constancy and the last three elements correspond to a selected triplet of the weight vector of linearity.
 # @return
 # \item{df}{The detail filter vector of length 3 which is used as a weight vector for the corresponding triplet of smooth coefficients.}
-# @author Hyeyoung Maeng \email{h.maeng4@@lancaster.ac.uk}, Piotr Fryzlewicz \email{p.fryzlewicz@@lse.ac.uk}
+# @author Hyeyoung Maeng \email{hyeyoung.maeng@@durham.ac.uk}, Piotr Fryzlewicz \email{p.fryzlewicz@@lse.ac.uk}
 # @seealso \code{\link{TGUW}}
 # @examples
 # x <- c(rep(1, 3), 1:3)
@@ -48,7 +48,7 @@ filter <- function(a) {
 # @param d A detail filter returned by \code{\link{filter}} which has a form of a vector with length 3.
 # @return
 # \item{M}{The orthonormal matrix with dimension 3 by 3 which is used in \code{\link{TGUW}} and \code{\link{invTGUW}}.}
-# @author Hyeyoung Maeng \email{h.maeng4@@lancaster.ac.uk}, Piotr Fryzlewicz \email{p.fryzlewicz@@lse.ac.uk}
+# @author Hyeyoung Maeng \email{hyeyoung.maeng@@durham.ac.uk}, Piotr Fryzlewicz \email{p.fryzlewicz@@lse.ac.uk}
 # @seealso \code{\link{TGUW}}, \code{\link{invTGUW}}, \code{\link{filter}}
 # @examples
 # x <- c(rep(1, 3), 1:3)
@@ -317,3 +317,191 @@ balance.p <- function(pr=pr, ee.p1=ee.p1, idx, ee.p2=ee.p2, n=n){
   return(blnc)
 }
 
+
+
+
+# other functions
+
+
+prefit <- function (x, maxcpts=ceiling(0.1*length(x)), p = 0.04, bal = 0, minsegL = floor(0.9*log(length(x))),
+                    continuous = FALSE, connected = FALSE){
+
+  n <- length(x)
+
+  ##### tguw transform
+  obj <- TGUW(x, p)
+
+  ##### thresholding with a very small threshold
+  obj <- thresholding(obj, lambda = 1, bal = bal,
+                      minsegL = minsegL, connected = connected)
+
+  ##### find cps
+  cpt <- finding.cp.orderkept(obj)[1:maxcpts]
+  no.of.cpt <- length(cpt)
+  cpt <- sort(cpt)
+
+  if (continuous == FALSE) {
+    est <- rep(NA, n)
+    sgmts <- cbind(c(1, cpt + 1), c(cpt, n))
+    for (i in 1:dim(sgmts)[1]) {
+      a <- c(sgmts[i, 1]:sgmts[i, 2])
+      est[a] <- stats::lm(x[a] ~ a)$fitted.values
+    }
+  }
+  else {
+    splns <- splines::bs(1:n, knots = cpt, degree = 1,
+                         intercept = TRUE)
+    est <- stats::lm.fit(splns, x)$fitted.values
+  }
+
+  list(x = x, est = est, no.of.cpt = no.of.cpt, cpt = cpt)
+
+}
+
+krt.hvt <- function(x, minsegL=floor(0.9*log(length(x)))){
+
+  epshat <- x-prefit(x, minsegL=minsegL)$est
+
+  ### kurtosis
+  n <- length(epshat)
+  kurt <- n * sum((epshat - mean(epshat))^4) / (sum((epshat - mean(epshat))^2)^2)
+
+  ### long run sd
+  rhohat = stats::coef(stats::arima(epshat, c(1,0,0)))[1]
+  longsd = sqrt((1+rhohat)/(1-rhohat))
+
+  ### single constant for any kurtosis (instead of using np fit)
+  kc = 1.3
+
+  #thr = 1.3 * kc * (kurt) * longsd
+  thr = 1.3 * kc * longsd  ### sqrt(2 log T) would be multiplied in trendsegment command.
+
+  return(list(thr=thr, kurt=kurt, longsd=longsd))
+}
+
+finding.cp.orderkept <- function(ts.obj){
+
+  ### ts.obj$twotogether adjustment
+  new.twotogether <- rep(NA, length(ts.obj$twotogether))
+
+  ini <- 1
+  j <- 1
+  while(j <= length(ts.obj$twotogether)){
+
+    if(j==length(ts.obj$twotogether)){break}
+    if(ts.obj$twotogether[j]!=0 && ts.obj$twotogether[j]==ts.obj$twotogether[j+1]){
+      new.twotogether[j]=new.twotogether[j+1]=ini
+      ini <- ini + 1
+      j <- j+2
+    }else{
+      new.twotogether[j] = ts.obj$twotogether[j]
+      j <- j+1
+    }
+  }
+  ts.obj$twotogether <- new.twotogether
+
+  if(length(ts.obj$twotogether)==1){
+    all.edges <- matrix(c(ts.obj$merging.hist[1,,], ts.obj$twotogether), ncol=1) #twotogether shows pairs
+  } else{
+    all.edges <- rbind(ts.obj$merging.hist[1,,], ts.obj$twotogether) #twotogether shows pairs
+  }
+  survived.idx <- which(abs(ts.obj$merging.hist[3,1,])>1e-10)
+  survived.edges <- all.edges[ ,survived.idx, drop=F]
+
+  survived.tt.idx <- ts.obj$twotogether[survived.idx]
+  survived.details <- abs(ts.obj$merging.hist[3,1,survived.idx])
+
+  ##### update survived details
+  j <- 1
+  while(j <= length(survived.details)){
+    if(survived.tt.idx[j]==survived.tt.idx[j+1]){
+      survived.details[j]=survived.details[j+1]=max(survived.details[j], survived.details[j+1])
+      j <- j+2
+    }else{
+      j <- j+1
+    }
+  }
+
+  #####
+  detail.size.order <- order(survived.details, decreasing=T)
+  survived.edges <- survived.edges[, detail.size.order]
+
+  if(length(survived.edges)==0){
+    cp <- c()
+  } else if(length(survived.edges)>0 & dim(survived.edges)[2]>1){
+    i <- 1
+    cp <- c()
+    while(i<dim(survived.edges)[2]){
+      part.obj <- ts.obj$merging.hist[1,c(1,2),] # for case 3): to differentiate it from case 4)
+      matched <- which(!is.na(match(data.frame(part.obj), data.frame(matrix(survived.edges[c(2:3),i], ncol=1))))) # for case 3): to differentiate it from case 4
+      ### 1) (xx from a chunk, xx from another chunk)
+      if((survived.edges[4,i]!=0) & diff(survived.edges[-4,i])[1]==1 & diff(survived.edges[-4,i+1])[1]==1){
+        cp <- c(cp, survived.edges[c(1, 3), i])
+        i <- i+2
+      } else if((survived.edges[4,i]!=0) & diff(survived.edges[-4,i])[2]==1 & diff(survived.edges[-4,i+1])[1]==1){
+        cp <- c(cp, survived.edges[c(1, 3), i+1])
+        i <- i+2
+      } else if((survived.edges[4,i]==0) & diff(survived.edges[-4,i])[1]==1 & diff(survived.edges[-4,i])[2]!=1){ ### 2) (xx from a chunk, x)
+        cp <-c(cp, survived.edges[c(1,3), i])
+        i <- i+1
+      } else if((survived.edges[4,i]==0) & diff(survived.edges[-4,i])[1]==1 & diff(survived.edges[-4,i])[2]==1 & length(matched)>0){ ### 3) (x, xx from a chunk)
+        cp <-c(cp, survived.edges[c(1,2), i])
+        i <- i+1
+      } else {
+        cp <-c(cp, survived.edges[c(1,2,3), i]) ### 4) (x, x, x)
+        i <- i+1
+      }
+    }
+    #cp <- unique(sort(cp))
+    cp <- unique(cp)
+    cp <- c(cp, ts.obj$n+1)
+  } else if(length(survived.edges)>0 & dim(survived.edges)[2]==1 & survived.edges[4,1]==0 & diff(survived.edges[-4,1])[1]==1 & diff(survived.edges[-4,1])[2]!=1){
+    cp <- c()
+    cp <- c(cp, survived.edges[c(1,3), 1])
+  } else if(length(survived.edges)>0 & dim(survived.edges)[2]==1 & survived.edges[4,1]==0 & diff(survived.edges[-4,1])[1]==1 & diff(survived.edges[-4,1])[2]==1){ ### 3) (x, xx from a chunk)
+    cp <- c()
+    cp <- c(cp, survived.edges[c(1,2), 1])
+  } else {
+    cp <- c()
+  }
+
+  ### last adjustment
+  # if the number of observation is three and the detail is survived then c.p=c(2,3)
+  if(ts.obj$n==3 & length(cp)>0 & dim(survived.edges)[2]==1){
+    cp <- cp[-1]
+    cp <- c(cp, ts.obj$n)
+  } else {
+    cp <- cp[which(cp<=ts.obj$n & cp>1)]
+  }
+
+  ### for comparing with other methods
+  if(length(cp)>0){
+    cp <- cp-1
+  }
+
+  return(cp)
+
+}
+
+
+long.run.sd<- function(x, pr=1.3, robust=T){
+
+  n <- length(x)
+  #m <- floor(n^(1/3))
+  m <- floor(n^(1/pr))
+  kn <- floor(n/m)
+
+  A <- rep(NA, m)
+  for(i in 1:m){
+    A[i] <- mean(x[(kn*(i-1)+1):min(n, kn*i)])
+  }
+
+  if(robust==T){
+    long.run.var = (kn/2)*stats::median((abs(diff(A)))^2)
+  }else{
+    long.run.var = (kn/2)*mean((abs(diff(A)))^2)
+  }
+
+  return(sqrt(long.run.var))
+
+}

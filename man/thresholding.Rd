@@ -25,7 +25,7 @@ This function is used inside \code{\link{trendsegment}} and performs the thresho
 The denoising is achieved by a prespecified threshold in a "connected" way in that it prunes the branches if and only if
 the detail coefficient itself and all of its children coefficients are below some thresholds in its size. Also, the
 "two together" rule is applied to any paired detail coefficients returned by Type 3
-merging (merging two sets of paired smooth coefficients) in the sense that both detail coefficients should be survived if at least one of their size is over threshold. For details, see H. Maeng and P. Fryzlewicz (2021), Detecting linear trend changes in data sequences, preprint.
+merging (merging two sets of paired smooth coefficients) in the sense that both detail coefficients should be survived if at least one of their size is over threshold. For details, see H. Maeng and P. Fryzlewicz (2023), Detecting linear trend changes in data sequences.
 }
 \examples{
 x <- c(1:10, rep(5,9))
@@ -41,5 +41,5 @@ thrfit
 \code{\link{trendsegment}}, \code{\link{TGUW}}, \code{\link{invTGUW}}
 }
 \author{
-Hyeyoung Maeng \email{h.maeng4@lancaster.ac.uk}, Piotr Fryzlewicz \email{p.fryzlewicz@lse.ac.uk}
+Hyeyoung Maeng \email{hyeyoung.maeng@durham.ac.uk}, Piotr Fryzlewicz \email{p.fryzlewicz@lse.ac.uk}
 }

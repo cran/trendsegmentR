@@ -4,12 +4,12 @@
 \alias{TGUW}
 \title{Tail-Greedy Unbalanced Wavelet (TGUW) transformation of a vector}
 \usage{
-TGUW(x, p = 0.01)
+TGUW(x, p = 0.04)
 }
 \arguments{
 \item{x}{An input vector to be decomposed.}
 
-\item{p}{Proportion of all possible remaining merges which specifies the number of merges allowed in a single pass over the data. The default is 0.01.}
+\item{p}{Proportion of all possible remaining merges which specifies the number of merges allowed in a single pass over the data. The default is 0.04.}
 }
 \value{
 A list with the followings:
@@ -21,7 +21,7 @@ A list with the followings:
 }
 \description{
 Performs the bottom-up unbalanced wavelet decomposition. This function is used inside \code{\link{trendsegment}}.
-Details of the TGUW transformation can be found in H. Maeng and P. Fryzlewicz (2021), Detecting linear trend changes in data sequences, preprint.
+Details of the TGUW transformation can be found in H. Maeng and P. Fryzlewicz (2023), Detecting linear trend changes in data sequences.
 }
 \examples{
 x <- c(1:10, rep(5,9))
@@ -34,5 +34,5 @@ tguwfit
 \code{\link{trendsegment}}, \code{\link{thresholding}}, \code{\link{invTGUW}}
 }
 \author{
-Hyeyoung Maeng \email{h.maeng4@lancaster.ac.uk}, Piotr Fryzlewicz \email{p.fryzlewicz@lse.ac.uk}
+Hyeyoung Maeng \email{hyeyoung.maeng@durham.ac.uk}, Piotr Fryzlewicz \email{p.fryzlewicz@lse.ac.uk}
 }

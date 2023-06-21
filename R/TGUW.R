@@ -1,17 +1,17 @@
 #' Tail-Greedy Unbalanced Wavelet (TGUW) transformation of a vector
 #'
 #' Performs the bottom-up unbalanced wavelet decomposition. This function is used inside \code{\link{trendsegment}}.
-#' Details of the TGUW transformation can be found in H. Maeng and P. Fryzlewicz (2021), Detecting linear trend changes in data sequences, preprint.
+#' Details of the TGUW transformation can be found in H. Maeng and P. Fryzlewicz (2023), Detecting linear trend changes in data sequences.
 #'
 #' @param x An input vector to be decomposed.
-#' @param p Proportion of all possible remaining merges which specifies the number of merges allowed in a single pass over the data. The default is 0.01.
+#' @param p Proportion of all possible remaining merges which specifies the number of merges allowed in a single pass over the data. The default is 0.04.
 #' @return A list with the followings:
 #' \item{x}{The original input vector \code{x}.}
 #' \item{n}{The length of \code{x}.}
 #' \item{twotogether}{A vector indicating locations of the detail coefficients returned by Type 3 merges (merging two sets of paired smooth coefficients). This is used in \code{\link{thresholding}} to apply the "two together" rule which makes both detail coefficients (paired by a Type 3 merge) survived if at least one of their size is over threshold.}
 #' \item{merging.hist}{An array of dimension 4 by 3 by \code{n}-2 which has the full record of the \code{n}-2 merges in the TGUW transformation. Each matrix contains the information of each merge. The first row shows the indices of merged smooth coefficients in increasing order and the second row gives the value of detail filter coefficients which is the weight vector for computing the corresponding detail coefficient. The third row shows the (detail coefficient, first smooth coefficient, second smooth coefficient) obtained by an orthonormal transform. The fourth row gives the balancedness of merging. If it is Type 1 merging (three initial smooth coefficients) then the fourth row is always (1/3, 1/3, 1/3). In Type 2 and Type 3 mergings, the values depend on the ratio of the length of the left and right wings to the entire merged region and only first two components of the fourth row are filled with the corresponding ratios (sum to 1) but the third one is left as NA.}
 #' \item{ts.coeffs}{The transformed \code{x} by the TGUW transformation.}
-#' @author Hyeyoung Maeng \email{h.maeng4@@lancaster.ac.uk}, Piotr Fryzlewicz \email{p.fryzlewicz@@lse.ac.uk}
+#' @author Hyeyoung Maeng \email{hyeyoung.maeng@@durham.ac.uk}, Piotr Fryzlewicz \email{p.fryzlewicz@@lse.ac.uk}
 #' @seealso \code{\link{trendsegment}}, \code{\link{thresholding}}, \code{\link{invTGUW}}
 #' @examples
 #' x <- c(1:10, rep(5,9))
@@ -22,7 +22,7 @@
 #' @export
 
 
-TGUW <- function(x, p = .01) {
+TGUW <- function(x, p = .04) {
 
   n <- length(x)
   noe <- n-2 # to be updated for each scale j

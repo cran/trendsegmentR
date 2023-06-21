@@ -4,7 +4,7 @@
 #' The denoising is achieved by a prespecified threshold in a "connected" way in that it prunes the branches if and only if
 #' the detail coefficient itself and all of its children coefficients are below some thresholds in its size. Also, the
 #' "two together" rule is applied to any paired detail coefficients returned by Type 3
-#' merging (merging two sets of paired smooth coefficients) in the sense that both detail coefficients should be survived if at least one of their size is over threshold. For details, see H. Maeng and P. Fryzlewicz (2021), Detecting linear trend changes in data sequences, preprint.
+#' merging (merging two sets of paired smooth coefficients) in the sense that both detail coefficients should be survived if at least one of their size is over threshold. For details, see H. Maeng and P. Fryzlewicz (2023), Detecting linear trend changes in data sequences.
 #'
 #' @param ts.obj A list returned by \code{TGUW}.
 #' @param lambda The magnitude of the threshold. It has a form of \code{sigma * th.const * sqrt(2 * log(n))} where \code{n} is the length of input data \code{x}, the default of \code{th.const} is 1.3 and the \code{sigma} can be estimated by Median Absolute Deviation (MAD) method under the Gaussian assumption for noise.
@@ -13,7 +13,7 @@
 #' @param connected If connected=TRUE, the thresholding puts the connected rule above the \code{minsegL}, otherwise it makes keeping the \code{minsegL} a priority.
 #' @return
 #' \item{ts.obj}{The modified ts.obj containing zero detail coefficients in the \code{merging.hist} if not survived from thresholding.}
-#' @author Hyeyoung Maeng \email{h.maeng4@@lancaster.ac.uk}, Piotr Fryzlewicz \email{p.fryzlewicz@@lse.ac.uk}
+#' @author Hyeyoung Maeng \email{hyeyoung.maeng@@durham.ac.uk}, Piotr Fryzlewicz \email{p.fryzlewicz@@lse.ac.uk}
 #' @seealso \code{\link{trendsegment}}, \code{\link{TGUW}}, \code{\link{invTGUW}}
 #' @examples
 #' x <- c(1:10, rep(5,9))
@@ -69,7 +69,7 @@ thresholding <- function(ts.obj, lambda, minsegL, bal = 0, connected = FALSE) {
     }
   }
 
-  if(connected == FALSE){
+  if(connected == F){
 
     svved <- which(ts.obj$merging.hist[3,1,]!=0) # survived indices
     should.remove <- c()
