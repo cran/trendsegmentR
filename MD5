@@ -1,13 +1,13 @@
-e7a920185e7a0fd98f697738c8c09adc *DESCRIPTION
+6189e16126eb36a10375584c13e5488c *DESCRIPTION
 25e6caa8f315d138624cfe40f553ce65 *NAMESPACE
 540e58c66f0ab2e406be0805bc3c3be6 *R/TGUW.R
 76b2cfe573d1e13a9d8b872d6b6a4c21 *R/invTGUW.R
 67b54cc20eab0650581f66ad8e910261 *R/misc.R
 04de5844d39d19989300a45ab04f4dec *R/thresholding.R
 6ecc5fda04a8906bd606f99e35d861a8 *R/trendsegment.R
-55486093fe654c715e7137a5290fd3be *R/trendsegmentR.R
+df6cc46bc7fae1a55b713f3d5065b35a *R/trendsegmentR-package.R
 71ea8b0265389a14fc687287398dd00f *man/TGUW.Rd
 09c5692dcfc1b8006c9a9c14325b8159 *man/invTGUW.Rd
 2c7a55b8859f521e15284e1282ba61cd *man/thresholding.Rd
 64a91fff15c05a659a06aa4793addb1f *man/trendsegment.Rd
-dcb45a43d2e9c0e5506c1637fcebd9e1 *man/trendsegmentR.Rd
+908beb44a095895f58a81ca8f5aea657 *man/trendsegmentR-package.Rd
