@@ -1,6 +1,6 @@
 Package: trendsegmentR
 Title: Linear Trend Segmentation
-Version: 1.3.0
+Version: 1.3.1
 Authors@R: c(person("Hyeyoung", "Maeng", email = "hyeyoung.maeng@durham.ac.uk", role = c("aut", "cre")), person("Piotr", "Fryzlewicz", email = "p.fryzlewicz@lse.ac.uk", role="aut"))
 Maintainer: Hyeyoung Maeng <hyeyoung.maeng@durham.ac.uk>
 Description: Performs the detection of linear trend changes for univariate time series 
@@ -9,10 +9,10 @@ Description: Performs the detection of linear trend changes for univariate time 
     change-points are returned with the piecewise-linear estimator for signal.
 License: GPL
 Encoding: UTF-8
-RoxygenNote: 7.2.3
+RoxygenNote: 7.3.2
 NeedsCompilation: no
 Repository: CRAN
-Packaged: 2023-08-24 10:59:33 UTC; hyeyoung
+Packaged: 2026-01-08 11:33:15 UTC; hyeyoung
 Author: Hyeyoung Maeng [aut, cre],
   Piotr Fryzlewicz [aut]
-Date/Publication: 2023-08-24 11:20:02 UTC
+Date/Publication: 2026-01-08 15:20:02 UTC

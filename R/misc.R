@@ -15,8 +15,8 @@
 #
 # y <- c(rep(1, 3), 4:6)
 # filter(y) # same as filter(x)
-# @export
-
+#' @keywords internal
+#' @noRd
 filter <- function(a) {
 
   #	work out a 3-tap high-pass filter which annihilates vectors a and b
@@ -38,9 +38,6 @@ filter <- function(a) {
 }
 
 
-
-
-
 # Finding an orthonormal matrix based on a detail filter vector
 #
 # This function is used inside \code{\link{TGUW}} function but is typically not called directly by the user. This gives an orthonormal matrix with dimension 3 by 3 by computing two low filter vectors based on a given detail filter vector. The returned orthonormal matrix is firstly used in the orthonormal transformation of \code{\link{TGUW}} when updating three neighbouring smooth coefficients into one detail and two smooth coefficients, and its inverse matrix is used in the inverse TGUW transformation (\code{\link{invTGUW}}).
@@ -54,8 +51,8 @@ filter <- function(a) {
 # x <- c(rep(1, 3), 1:3)
 # df <- filter(x) # detail filter
 # orthmatrix(df)
-# @export
-
+#' @keywords internal
+#' @noRd
 orthmatrix <- function(d) {
 
   M <- matrix(0, 3, 3)
@@ -80,15 +77,13 @@ orthmatrix <- function(d) {
 }
 
 
-
-
-
 # Finding the detected change-points from the object returned by the inverse TGUW transformation
 # INTERNAL function in \code{\link{trendsegment}} to obtain the estimated change-points by trendsegment algorithm. This function is typically not called directly by the user.
 #  @param ts.obj An object returned by \code{invTGUW}.
 #  @return
 #  \item{cp}{The estimated change-points}
-
+#' @keywords internal
+#' @noRd
 finding.cp <- function(ts.obj){
 
   if(length(ts.obj$twotogether)==1){
@@ -153,9 +148,6 @@ finding.cp <- function(ts.obj){
 }
 
 
-
-
-
 # Computing the detail coefficient for all triplets at each scale
 # INTERNAL function in \code{\link{TGUW}} to obtain the sequence of detail coefficients for all candidate triplets of smooth coefficients. This function is typically not called directly by the user.
 # @param edges A matrix with 4 columns. Each row corresponds to indices of each triplet and the row length is the number of allowed merges.
@@ -169,7 +161,8 @@ finding.cp <- function(ts.obj){
 # \item{wc}{The matrix containing selected triplets of the weight vector of constancy.}
 # \item{wl}{The matrix containing selected triplets of the weight vector of linearity.}
 # \item{tc}{The matrix containing selected triplets of transformed \code{x}.}
-
+#' @keywords internal
+#' @noRd
 computeDET <- function(edges = edges, edgerow = edgerow, weights.const = weights.const, weights.lin = weights.lin, ts.coeffs = ts.coeffs){
 
   sub.wc <- cbind(weights.const[edges[edgerow,1]], weights.const[edges[edgerow,2]], weights.const[edges[edgerow,3]])
@@ -179,12 +172,6 @@ computeDET <- function(edges = edges, edgerow = edgerow, weights.const = weights
   details <- colSums(detcoef*t(sub.tc))
   return(list(detcoef=detcoef, det=details, wc=sub.wc, wl=sub.wl, tc=sub.tc))
 }
-
-
-
-
-
-
 
 
 # Updating two weight vectors (of constancy and of linearity) and data sequence for all chosen triplets by orthonormal transforms
@@ -201,7 +188,8 @@ computeDET <- function(edges = edges, edgerow = edgerow, weights.const = weights
 # \item{idx}{The updated survived indices of \code{x} through the orthonormal transformations performed for all selected triplets.}
 # \item{h}{The matrix containing the detail filter vector for all selected triplets. This is recorded in the second row of \code{merging.hist}.}
 # \item{tc1}{The vector containing the transformed triplets of smooth coefficients at a certain scale. This is recorded in the third row of \code{merging.hist}.}
-
+#' @keywords internal
+#' @noRd
 updating <- function(ee = ee, weights.const = weights.const, weights.lin = weights.lin, ts.coeffs = ts.coeffs, idx = idx){
 
   wc0 <- cbind(weights.const[ee[,1]], weights.const[ee[,2]], weights.const[ee[,3]])
@@ -239,11 +227,6 @@ updating <- function(ee = ee, weights.const = weights.const, weights.lin = weigh
 }
 
 
-
-
-
-
-
 # Computing the balancedness for Type 1 or Type 2 merges
 # INTERNAL function in \code{\link{TGUW}} to compute the balancedness of each merge when the merge is either Type 1 (merging three initial smooth coefficients) or Type 2 (merging one initial and a paired smooth coefficient). This function is typically not called directly by the user.
 # @param paired The vector containing all pairs of indices which are under "two together" rule.
@@ -253,7 +236,8 @@ updating <- function(ee = ee, weights.const = weights.const, weights.lin = weigh
 # @param n The length of input data \code{x}.
 # @return
 # \item{blnc}{The matrix containing balancedness of each merge in each column.}
-
+#' @keywords internal
+#' @noRd
 balance.np <- function(paired=paired, ee=ee, idx, no.of.current.steps=no.of.current.steps, n=n){
   prd <- !is.na(matrix(match(ee, paired), ncol=3))
   blnc <- matrix(NA, nrow=3, ncol=no.of.current.steps)
@@ -286,11 +270,6 @@ balance.np <- function(paired=paired, ee=ee, idx, no.of.current.steps=no.of.curr
 }
 
 
-
-
-
-
-
 # Computing the balancedness for Type 3 merges
 # INTERNAL function in \code{\link{TGUW}} to compute the balancedness of each merge when the merge is categorised into Type 3 (merging two sets of (paired) smooth coefficients). This function is typically not called directly by the user.
 # @param pr The matrix indicating indices of Type 3 merges.
@@ -300,7 +279,8 @@ balance.np <- function(paired=paired, ee=ee, idx, no.of.current.steps=no.of.curr
 # @param n The length of input data \code{x}.
 # @return
 # \item{blnc}{The matrix containing balancedness of each merge in each column.}
-
+#' @keywords internal
+#' @noRd
 balance.p <- function(pr=pr, ee.p1=ee.p1, idx, ee.p2=ee.p2, n=n){
 
   blnc <- matrix(NA, nrow=3, ncol=dim(pr)[2])
@@ -318,11 +298,8 @@ balance.p <- function(pr=pr, ee.p1=ee.p1, idx, ee.p2=ee.p2, n=n){
 }
 
 
-
-
-# other functions
-
-
+#' @keywords internal
+#' @noRd
 prefit <- function (x, maxcpts=ceiling(0.1*length(x)), p = 0.04, bal = 0, minsegL = floor(0.9*log(length(x))),
                     continuous = FALSE, connected = FALSE){
 
@@ -358,6 +335,9 @@ prefit <- function (x, maxcpts=ceiling(0.1*length(x)), p = 0.04, bal = 0, minseg
 
 }
 
+
+#' @keywords internal
+#' @noRd
 krt.hvt <- function(x, minsegL=floor(0.9*log(length(x)))){
 
   epshat <- x-prefit(x, minsegL=minsegL)$est
@@ -379,6 +359,9 @@ krt.hvt <- function(x, minsegL=floor(0.9*log(length(x)))){
   return(list(thr=thr, kurt=kurt, longsd=longsd))
 }
 
+
+#' @keywords internal
+#' @noRd
 finding.cp.orderkept <- function(ts.obj){
 
   ### ts.obj$twotogether adjustment
@@ -484,6 +467,8 @@ finding.cp.orderkept <- function(ts.obj){
 }
 
 
+#' @keywords internal
+#' @noRd
 long.run.sd<- function(x, pr=1.3, robust=T){
 
   n <- length(x)
