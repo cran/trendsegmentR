@@ -7,7 +7,7 @@
 trendsegment(
   x,
   indep = FALSE,
-  th.const = krt.hvt(x)$thr,
+  th.const = NULL,
   p = 0.04,
   bal = 0,
   minsegL = floor(0.9 * log(length(x))),
@@ -20,7 +20,7 @@ trendsegment(
 
 \item{indep}{If x is known to be independent over time, let indep=TRUE, otherwise the default is indep=FALSE.}
 
-\item{th.const}{Robust thresholding parameter used in \code{\link{thresholding}}. The default is obtained by considering sample kurtosis and long run standard deviation. The exact magnitude of the threshold also depends on \code{sigma} which is estimated by Median Absolute Deviation (MAD) method under the i.i.d. Gaussian noise assumption.}
+\item{th.const}{Robust thresholding parameter used in \code{\link{thresholding}}. If nothing is given, the default is obtained inside the function \code{trendsegment} by considering sample kurtosis and long run standard deviation. The exact magnitude of the threshold also depends on \code{sigma} which is estimated by Median Absolute Deviation (MAD) method under the i.i.d. Gaussian noise assumption.}
 
 \item{p}{Proportion of all possible remaining merges which specifies the number of merges allowed in a single pass over the data. This is used in \code{\link{TGUW}} and the default is 0.04.}
 

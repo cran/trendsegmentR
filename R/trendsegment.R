@@ -6,7 +6,7 @@
 #'
 #' @param x A data vector to be examined for change-point detection.
 #' @param indep If x is known to be independent over time, let indep=TRUE, otherwise the default is indep=FALSE.
-#' @param th.const Robust thresholding parameter used in \code{\link{thresholding}}. The default is obtained by considering sample kurtosis and long run standard deviation. The exact magnitude of the threshold also depends on \code{sigma} which is estimated by Median Absolute Deviation (MAD) method under the i.i.d. Gaussian noise assumption.
+#' @param th.const Robust thresholding parameter used in \code{\link{thresholding}}. If nothing is given, the default is obtained inside the function \code{trendsegment} by considering sample kurtosis and long run standard deviation. The exact magnitude of the threshold also depends on \code{sigma} which is estimated by Median Absolute Deviation (MAD) method under the i.i.d. Gaussian noise assumption.
 #' @param p Proportion of all possible remaining merges which specifies the number of merges allowed in a single pass over the data. This is used in \code{\link{TGUW}} and the default is 0.04.
 #' @param bal The minimum ratio of the length of the shorter region to the length of the entire merging region especially when the merges of Type 2 (merging one initial and a paired smooth coefficient) or of Type 3 (merging two sets of (paired) smooth coefficients) are performed. The default is set to 0.
 #' @param minsegL The minimum segment length of estimated signal returned by \code{trendsegment}. The default is set to \code{sigma * log(n)} for the noise which is possibly dependent and/or non-Gaussian.
@@ -32,7 +32,7 @@
 #' @importFrom stats mad
 #' @export
 
-trendsegment <- function(x, indep = FALSE, th.const = krt.hvt(x)$thr, p = .04, bal = 0, minsegL = floor(0.9*log(length(x))),
+trendsegment <- function(x, indep = FALSE, th.const = NULL, p = .04, bal = 0, minsegL = floor(0.9*log(length(x))),
                          continuous = FALSE, connected = FALSE){
 
   n <- length(x)
@@ -46,6 +46,9 @@ trendsegment <- function(x, indep = FALSE, th.const = krt.hvt(x)$thr, p = .04, b
     sigma <- long.run.sd(x)
   }
 
+  if(is.null(th.const)){
+    th.const <- krt.hvt(x)$thr
+    }
   lambda <- sigma * sqrt(2 * log(n)) * th.const
 
   if (n == 1) {
